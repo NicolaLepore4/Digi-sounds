@@ -83,7 +83,6 @@ PRs are welcome for:
 
 ## License
 MIT License - See [LICENSE](LICENSE) file
-```
 
 This README includes:
 1. Clear usage instructions
