@@ -1,0 +1,48 @@
+# Configurazione personalizzata dei suoni di sistema
+
+$events = @(
+    @{ Name='SystemStart';    Original='Windows Startup.wav' },
+    @{ Name='DeviceConnect'; Original='Device Connect.wav' },
+    @{ Name='Power';         Original='Windows Battery Low.wav' }
+)
+
+$customUrl  = 'https://raw.githubusercontent.com/NicolaLepore4/Digi-sounds/main/sounds/fart.wav'
+$localDir   = Join-Path $env:APPDATA 'SuoniPersonalizzati'
+$localPath  = Join-Path $localDir 'fart.wav'
+
+# Crea la cartella se non esiste
+if (-not (Test-Path $localDir)) {
+    New-Item -Path $localDir -ItemType Directory -Force | Out-Null
+}
+
+# Verifica se il suono personalizzato è già attivo
+$customActive = $false
+foreach ($e in $events) {
+    $reg = "HKCU:\AppEvents\Schemes\Apps\.Default\$($e.Name)\.Current"
+    $current = (Get-ItemProperty -Path $reg -Name '(Default)' -ErrorAction SilentlyContinue).'(Default)'
+    if ($current -eq $localPath) {
+        $customActive = $true
+        break
+    }
+}
+
+if ($customActive) {
+    # Ripristina i suoni originali e rimuove il custom
+    foreach ($e in $events) {
+        $reg = "HKCU:\AppEvents\Schemes\Apps\.Default\$($e.Name)\.Current"
+        $orig = Join-Path 'C:\Windows\Media' $e.Original
+        Set-ItemProperty -Path $reg -Name '(Default)' -Value $orig
+    }
+    Remove-Item -Path $localPath -Force -ErrorAction SilentlyContinue
+} else {
+    # Scarica e imposta il suono personalizzato
+    try {
+        Invoke-WebRequest -Uri $customUrl -OutFile $localPath -UseBasicParsing -ErrorAction Stop
+        foreach ($e in $events) {
+            $reg = "HKCU:\AppEvents\Schemes\Apps\.Default\$($e.Name)\.Current"
+            Set-ItemProperty -Path $reg -Name '(Default)' -Value $localPath
+        }
+    } catch {
+        Write-Error "Download o impostazione custom fallito: $_"
+    }
+}
