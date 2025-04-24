@@ -1,4 +1,3 @@
-```markdown
 # DigiSounds - Custom System Sounds Changer
 
 ⚠️ **Disclaimer**: Use this script only on systems you own and with proper authorization. Modifying system settings can cause instability. The author is not responsible for any misuse or damage.
